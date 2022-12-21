@@ -38,10 +38,10 @@ class Connector:
         except FileNotFoundError:
             print(f'Создаю {self.__data_file}')
             fp = open(self.__data_file, 'w', encoding='utf-8')
-            data = {}
+            data = []
             json.dump(data, fp)
         else:
-            data = json.load(self.__data_file)
+            data = json.load(fp)
             print(data)
         finally:
             fp.close()
@@ -50,9 +50,12 @@ class Connector:
         """
         Запись данных в файл с сохранением структуры и исходных данных
         """
-        fp = open(self.__data_file, 'w', encoding='utf-8')
+        fp = open(self.__data_file, 'r', encoding='utf-8')
         r_data = json.load(fp)
-        r_data.uppend(data)
+        r_data.append(data)
+        fp.close()
+
+        fp = open(self.__data_file, 'w', encoding='utf-8')
         json.dump(r_data, fp)
         fp.close()
 
@@ -62,11 +65,11 @@ class Connector:
         фильтрации, а значение это искомое значение, например:
         {'price': 1000}, должно отфильтровать данные по полю price и вернуть все строки, в которых цена 1000
         """
-        if not len(query): return
-
         fp = open(self.__data_file, 'r', encoding='utf-8')
         data = json.load(fp)
         fp.close()
+
+        if not len(query): return data
 
         query_data = []
 
@@ -86,10 +89,13 @@ class Connector:
         fp = open(self.__data_file, 'r', encoding='utf-8')
         data = json.load(fp)
         fp.close()
+        cntr = 0
 
-        for k in data[query.keys()]:
-            if data[k] == query.values():
-                del data[k]
+        for k in data:
+            if k.get(list(query.keys())[0]) == list(query.values())[0]:
+                del data[cntr]
+
+            cntr += 1
 
         fp = open(self.__data_file, 'w', encoding='utf-8')
         json.dump(data, fp)
@@ -107,7 +113,7 @@ if __name__ == '__main__':
     data_from_file = df.select(dict())
     assert data_from_file == [data_for_file]
 
-    df.delete(dict())
+    df.delete({'id': 1})
     data_from_file = df.select(dict())
     assert data_from_file == []
 
