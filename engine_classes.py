@@ -18,7 +18,7 @@ class HH(Engine):
     __per_page = 20
 
     def _get_vacancies(self, search_word, page):
-        print(f'Try to get page number: {page + 1}')
+        print(f'Try to get from hh.ru page number: {page + 1}')
         responce = requests.get(f'{self.__url}/vacancies?text=java')
 #        responce = requests.get(f'{self.__url}/vacancies?text={search_word}&page={page}')
         if responce.status_code == 200:
@@ -53,12 +53,11 @@ if __name__ == '__main__':
     result = hh_engine.get_request(search_word, vacancies_count)
     print(len(result))
 
-    with open('res.json', 'w', encoding='utf-8') as res_file:
+    with open('hh_res.json', 'w', encoding='utf-8') as res_file:
         json.dump(result, res_file)
 
-    with open('res.json', 'r', encoding='utf-8') as res_file:
+    with open('hh_res.json', 'r', encoding='utf-8') as res_file:
         res_data = json.load(res_file)
         for item in res_data:
             print(f'{item.get("name")}, {item["url"]}, {item.get("salary")}), {item["schedule"].get("name")}, \n    '
-                  f'{item["snippet"].get("requirement")}, \n    '
-                  f'{item["experience"].get("name")}, {item["area"].get("name")}')
+                  f'{item["snippet"].get("requirement")}, {item["area"].get("name")}')
