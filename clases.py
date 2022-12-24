@@ -62,14 +62,11 @@ class CountMixin:
 
 class HHVacancy(Vacancy, CountMixin):  # add counter mixin
     """ HeadHunter Vacancy """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name, job, link, description, salary):
+        super().__init__(name, job, link, description, salary)
 
     def __str__(self):
         return 'HH: ' + super().__str__()
-
-    # def count_of_vacancies(self):
-    #     return f'От сервиса hh.ru получено {self.get_count_of_vacancies("hh_res.json")} вакансий.'
 
 
 class SJVacancy(Vacancy, CountMixin):  # add counter mixin
@@ -80,41 +77,48 @@ class SJVacancy(Vacancy, CountMixin):  # add counter mixin
     def __str__(self):
         return 'SJ: ' + super().__str__()
 
-    def count_of_vacancies(self):
-        return f'От сервиса sj.ru получено {self.get_count_of_vacancies("sj_res.json")} вакансий.'
+    def get_raw_data(self):
+        return {
+            'name': self.name, 'job': self.job, 'lnk': self.link, 'description': self.description, 'salary': self.salary
+        }
 
+    def sorting(self):
+        """ Должен сортировать любой список вакансий по ежемесячной оплате (gt, lt magic methods)
+         Сортирует sj_res.json в sj_sort.json"""
 
-def sorting(self):
-    """ Должен сортировать любой список вакансий по ежемесячной оплате (gt, lt magic methods)
-     Сортирует sj_res.json в sj_res_sort.json"""
+        data = []
+        fp = open('sj_res.json', 'r', encoding='utf-8')
+        tmp_data = json.load(fp)
+        fp.close()
 
-    data = []
-    fp = open('sj_res.json', 'r', encoding='utf-8')
-    tmp_data = json.load(fp)
-    fp.close()
+        for object in tmp_data:
+            tmp_name = object["client"].get("title")
+            tmp_job = object.get("profession")
+            tmp_link = object.get("link")
+            tmp_description = object.get("work")
+            tmp_salary_from = object.get("payment_from")
+            tmp_salary_to = object.get("payment_to")
+            tmp_salary_curr = object.get("currency")
 
-    for object in tmp_data:
-        tmp_name = object["client"].get("title")
-        tmp_job = object.get("profession")
-        tmp_link = object.get("link")
-        tmp_description = object.get("work")
-        tmp_salary_from = object.get("payment_from")
-        tmp_salary_to = object.get("payment_to")
-        tmp_salary_curr = object.get("currency")
+            tmp_salary = 0
+            if tmp_salary_from:
+                tmp_salary = tmp_salary_from
+            else:
+                tmp_salary = tmp_salary_to
 
-        tmp_salary = 0
-        if tmp_salary_from:
-            tmp_salary = tmp_salary_from
-        else:
-            tmp_salary = tmp_salary_to
+            if tmp_salary_curr == 'usd': tmp_salary *= self.usd
+            if tmp_salary_curr == 'eur': tmp_salary *= self.eur
 
-        if tmp_salary_curr == 'usd': tmp_salary *= self.usd
-        if tmp_salary_curr == 'eur': tmp_salary *= self.eur
+            # Данные для десериализации готовы
+            sj_vac = SJVacancy(tmp_name, tmp_job, tmp_link, tmp_description, tmp_salary)
+            data.append(sj_vac)
 
-        sj_vac = SJVacancy(tmp_name, tmp_job, tmp_link, tmp_description, tmp_salary)
-        data.append(sj_vac)
+        data.sort(reverse=True)
 
-    return data
+        fp = open('sj_sort.json', 'w', encoding='utf-8')
+        json.dump(data, fp, indent=2, ensure_ascii=False, default=lambda o: o.get_raw_data())
+        fp.close()
+
 
 
 def get_top(vacancies, top_count):
@@ -123,4 +127,4 @@ def get_top(vacancies, top_count):
 
 
 if __name__ == '__main__':
-    sorting('sj_res.json')
+    SJVacancy.sorting('sj_res.json')
