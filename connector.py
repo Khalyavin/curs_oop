@@ -2,10 +2,6 @@ import json
 import os
 
 cwd = os.getcwd()
-# df = 'df.json'
-# full_path = os.path.join(cwd, df)
-# print(full_path)
-
 
 class Connector:
     """
