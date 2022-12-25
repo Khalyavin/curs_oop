@@ -15,15 +15,6 @@ class Connector:
         self.__data_file = os.path.join(cwd, df)
         self.__connect()
 
-    # @property
-    # def data_file(self):
-    #     pass
-    #
-    # @data_file.setter
-    # def data_file(self, value):
-    #     # тут должен быть код для установки файла
-    #     self.__connect()
-
     def __connect(self):
         """
         Проверка на существование файла с данными и создание его при необходимости
