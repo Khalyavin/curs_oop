@@ -20,7 +20,7 @@ class Vacancy(ABC):
 
     def get_raw_data(self):
         return {
-            'name': self.name, 'job': self.job, 'lnk': self.link, 'description': self.description, 'salary': self.salary
+            'name': self.name, 'job': self.job, 'link': self.link, 'description': self.description, 'salary': self.salary
         }
 
     def __gt__(self, other):
@@ -151,11 +151,33 @@ def sorting(file):
 
 
 
-def get_top(vacancies, top_count):
-    """ Должен возвращать {top_count} записей из вакансий по зарплате (iter, next magic methods) """
-    pass
+def get_top(hh_file, sj_file, top_count):
+    """ Возвращает {top_count} записей из вакансий по зарплате (iter, next magic methods) """
+    hh_fp = open(hh_file, 'r', encoding='utf-8')
+    sj_fp = open(sj_file, 'r', encoding='utf-8')
+    hh_data = json.load(hh_fp)
+    sj_data = json.load(sj_fp)
+    hh_fp.close()
+    sj_fp.close()
+
+    tmp_cntr = 0
+    hh_cntr = 0
+    sj_cntr = 0
+
+    while tmp_cntr <= top_count:
+        tmp_cntr += 1
+        if int(hh_data[hh_cntr]["salary"]) > int(sj_data[sj_cntr]["salary"]):
+            print(f'HH: {hh_data[hh_cntr]["name"]}. {hh_data[hh_cntr]["job"]}. З/п {hh_data[hh_cntr]["salary"]} в мес.')
+            print(f'    {hh_data[hh_cntr]["link"]}{hh_data[hh_cntr]["description"]}')
+            hh_cntr += 1
+        else:
+            print(f'SJ: {sj_data[sj_cntr]["name"]}. {sj_data[sj_cntr]["job"]}. З/п {sj_data[sj_cntr]["salary"]} в мес.')
+            print(f'    {sj_data[sj_cntr]["link"]} {sj_data[sj_cntr]["description"]}')
+            sj_cntr += 1
+
 
 
 if __name__ == '__main__':
     sorting('sj_res.json')
     sorting('hh_res.json')
+    get_top('hh_sort.json', 'sj_sort.json', 15)
